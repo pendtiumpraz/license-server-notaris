@@ -4,7 +4,7 @@ import { requireAuth } from '@/lib/auth';
 
 // PATCH /api/admin/licenses/[id] — Update license
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    const authError = requireAuth(request);
+    const authError = await requireAuth(request);
     if (authError) return authError;
 
     const { id } = await params;
@@ -28,7 +28,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 // DELETE /api/admin/licenses/[id] — Unbind domain
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    const authError = requireAuth(request);
+    const authError = await requireAuth(request);
     if (authError) return authError;
 
     const { id } = await params;

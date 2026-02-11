@@ -4,7 +4,7 @@ import { requireAuth } from '@/lib/auth';
 
 // GET /api/admin/stats
 export async function GET(request: NextRequest) {
-    const authError = requireAuth(request);
+    const authError = await requireAuth(request);
     if (authError) return authError;
 
     try {

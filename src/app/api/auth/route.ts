@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const adminPass = process.env.ADMIN_PASSWORD || 'admin';
 
     if (username === adminUser && password === adminPass) {
-        const token = createSession(username);
+        const token = await createSession(username);
         const response = NextResponse.json({ success: true });
         response.cookies.set('session_token', token, {
             httpOnly: true,
@@ -34,7 +34,7 @@ export async function DELETE(request: NextRequest) {
 
 // GET /api/auth — Check session
 export async function GET(request: NextRequest) {
-    const token = getSessionToken(request);
+    const token = await getSessionToken(request);
     if (token) return NextResponse.json({ valid: true });
     return NextResponse.json({ valid: false }, { status: 401 });
 }

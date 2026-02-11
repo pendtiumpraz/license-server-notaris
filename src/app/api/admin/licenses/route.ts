@@ -15,7 +15,7 @@ function generateLicenseKey(): string {
 
 // GET /api/admin/licenses — List all
 export async function GET(request: NextRequest) {
-    const authError = requireAuth(request);
+    const authError = await requireAuth(request);
     if (authError) return authError;
 
     try {
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/licenses — Create new
 export async function POST(request: NextRequest) {
-    const authError = requireAuth(request);
+    const authError = await requireAuth(request);
     if (authError) return authError;
 
     const body = await request.json();

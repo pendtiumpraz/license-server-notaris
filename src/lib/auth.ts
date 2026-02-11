@@ -1,30 +1,48 @@
-import crypto from 'crypto';
+import { SignJWT, jwtVerify } from 'jose';
 import { NextResponse, type NextRequest } from 'next/server';
 
-// In-memory sessions. For production, consider using a DB or JWT.
-const sessions = new Map<string, { username: string; expiresAt: number }>();
+const JWT_SECRET_KEY = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || 'fallback-secret';
 
-export function createSession(username: string): string {
-    const token = crypto.randomBytes(32).toString('hex');
-    sessions.set(token, { username, expiresAt: Date.now() + 24 * 60 * 60 * 1000 });
+function getJwtSecret() {
+    return new TextEncoder().encode(JWT_SECRET_KEY);
+}
+
+/**
+ * Create a JWT session token (stateless, survives serverless cold starts)
+ */
+export async function createSession(username: string): Promise<string> {
+    const token = await new SignJWT({ username })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setExpirationTime('24h')
+        .sign(getJwtSecret());
     return token;
 }
 
-export function validateSession(token: string | undefined): boolean {
+/**
+ * Validate a JWT session token
+ */
+export async function validateSession(token: string | undefined): Promise<boolean> {
     if (!token) return false;
-    const session = sessions.get(token);
-    if (!session) return false;
-    if (session.expiresAt < Date.now()) {
-        sessions.delete(token);
+    try {
+        await jwtVerify(token, getJwtSecret());
+        return true;
+    } catch {
         return false;
     }
-    return true;
 }
 
-export function deleteSession(token: string): void {
-    sessions.delete(token);
+/**
+ * Delete session — with JWT this is a no-op (token expires naturally)
+ * Client side should delete the cookie
+ */
+export function deleteSession(_token: string): void {
+    // JWT is stateless, no server-side cleanup needed
 }
 
+/**
+ * Validate API_SECRET for server-to-server auth
+ */
 export function validateApiSecret(request: NextRequest): boolean {
     const authHeader = request.headers.get('authorization');
     const apiSecret = process.env.API_SECRET;
@@ -32,23 +50,29 @@ export function validateApiSecret(request: NextRequest): boolean {
     return authHeader === `Bearer ${apiSecret}`;
 }
 
-export function getSessionToken(request: NextRequest): string | undefined {
+/**
+ * Get and validate session token from cookie or Authorization header
+ */
+export async function getSessionToken(request: NextRequest): Promise<string | undefined> {
     // Check cookie first (dashboard), then Authorization header (API)
     const cookieToken = request.cookies.get('session_token')?.value;
-    if (cookieToken && validateSession(cookieToken)) return cookieToken;
+    if (cookieToken && await validateSession(cookieToken)) return cookieToken;
 
     const authHeader = request.headers.get('authorization')?.replace('Bearer ', '');
-    if (authHeader && validateSession(authHeader)) return authHeader;
+    if (authHeader && await validateSession(authHeader)) return authHeader;
 
     return undefined;
 }
 
-export function requireAuth(request: NextRequest): NextResponse | null {
+/**
+ * Middleware-style auth check. Returns null if authorized, or a 401 response.
+ */
+export async function requireAuth(request: NextRequest): Promise<NextResponse | null> {
     // Allow API_SECRET auth
     if (validateApiSecret(request)) return null;
 
-    // Allow session auth
-    const token = getSessionToken(request);
+    // Allow session auth (JWT)
+    const token = await getSessionToken(request);
     if (token) return null;
 
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
