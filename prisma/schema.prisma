@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model LicenseKey {
+  id           String    @id @default(uuid())
+  key          String    @unique
+  packageType  String    @map("package_type") // complete, no_ai, limited_ai
+
+  // Buyer info
+  holderName   String    @map("holder_name")    // Nama notaris / PIC
+  officeName   String?   @map("office_name")    // Nama kantor notaris
+  holderEmail  String?   @map("holder_email")
+  holderPhone  String?   @map("holder_phone")
+  address      String?                          // Alamat kantor
+
+  // Domain binding
+  boundDomain  String?   @map("bound_domain")   // null = not yet activated
+  serverHash   String?   @map("server_hash")    // hash of the bound server
+
+  // Status
+  isActive     Boolean   @default(true) @map("is_active")
+  activatedAt  DateTime? @map("activated_at")
+  expiresAt    DateTime? @map("expires_at")     // null = lifetime license
+  lastVerified DateTime? @map("last_verified")
+
+  // Piracy tracking
+  piracyAttempts Int     @default(0) @map("piracy_attempts")
+  lastPiracyAt   DateTime? @map("last_piracy_at")
+
+  // Metadata
+  notes        String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Logs
+  activationLogs LicenseLog[]
+
+  @@index([key])
+  @@index([boundDomain])
+  @@index([isActive])
+  @@index([piracyAttempts])
+  @@map("license_keys")
+}
+
+model LicenseLog {
+  id         String   @id @default(uuid())
+  licenseId  String   @map("license_id")
+  action     String   // activate, verify, deactivate, reject, piracy_attempt
+  domain     String?
+  serverHash String?  @map("server_hash")
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  details    String?
+  isPiracy   Boolean  @default(false) @map("is_piracy")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  license LicenseKey @relation(fields: [licenseId], references: [id])
+
+  @@index([licenseId])
+  @@index([createdAt])
+  @@index([isPiracy])
+  @@map("license_logs")
+}

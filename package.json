@@ -1,0 +1,26 @@
+{
+    "name": "notaris-license-server",
+    "version": "1.0.0",
+    "description": "License server for Notaris Portal - Deploy to Vercel",
+    "scripts": {
+        "dev": "next dev --port 4000",
+        "build": "next build",
+        "start": "next start --port 4000",
+        "generate-key": "tsx scripts/generate-key.ts",
+        "postinstall": "prisma generate"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.3.0",
+        "next": "^15.1.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "prisma": "^6.3.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.1",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.3"
+    }
+}
