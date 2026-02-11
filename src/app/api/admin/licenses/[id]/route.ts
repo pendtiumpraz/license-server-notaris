@@ -9,7 +9,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const { id } = await params;
     const body = await request.json();
-    const allowedFields = ['isActive', 'expiresAt', 'notes', 'packageType', 'holderName', 'officeName', 'holderEmail', 'holderPhone', 'address'];
+    const allowedFields = ['isActive', 'expiresAt', 'notes', 'packageType', 'holderName', 'officeName', 'holderEmail', 'holderPhone', 'address', 'boundDomain'];
 
     try {
         const data: Record<string, unknown> = {};

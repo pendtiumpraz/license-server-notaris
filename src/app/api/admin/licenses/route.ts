@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     if (authError) return authError;
 
     const body = await request.json();
-    const { packageType, holderName, officeName, holderEmail, holderPhone, address, expiresAt, notes } = body;
+    const { packageType, holderName, officeName, holderEmail, holderPhone, address, boundDomain, expiresAt, notes } = body;
 
     if (!packageType || !holderName) {
         return NextResponse.json({ error: 'packageType dan holderName harus diisi' }, { status: 400 });
@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
                 holderEmail: holderEmail || null,
                 holderPhone: holderPhone || null,
                 address: address || null,
+                boundDomain: boundDomain || null,
                 expiresAt: expiresAt ? new Date(expiresAt) : null,
                 notes: notes || null,
             },

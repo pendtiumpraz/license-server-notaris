@@ -842,6 +842,7 @@ function CreateLicenseModal({ onClose, onCreate }: {
         holderEmail: '',
         holderPhone: '',
         address: '',
+        boundDomain: '',
         expiresAt: '',
         notes: '',
     });
@@ -893,6 +894,11 @@ function CreateLicenseModal({ onClose, onCreate }: {
                     <div className="form-group">
                         <label className="form-label">Alamat Kantor</label>
                         <input className="form-input" value={form.address} onChange={e => set('address', e.target.value)} placeholder="Jl. Merdeka No. 1, Jakarta" />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Domain (opsional, akan otomatis terisi saat aktivasi)</label>
+                        <input className="form-input" value={form.boundDomain} onChange={e => set('boundDomain', e.target.value)} placeholder="notaris.example.com" />
                     </div>
 
                     <div className="form-group">
@@ -1072,6 +1078,7 @@ function EditLicenseModal({ license, onClose, onSave }: {
         holderEmail: license.holderEmail || '',
         holderPhone: license.holderPhone || '',
         address: license.address || '',
+        boundDomain: license.boundDomain || '',
         packageType: license.packageType,
         expiresAt: license.expiresAt ? license.expiresAt.split('T')[0] : '',
         notes: license.notes || '',
@@ -1088,6 +1095,7 @@ function EditLicenseModal({ license, onClose, onSave }: {
             holderEmail: form.holderEmail || null,
             holderPhone: form.holderPhone || null,
             address: form.address || null,
+            boundDomain: form.boundDomain || null,
             notes: form.notes || null,
         });
     };
@@ -1134,6 +1142,11 @@ function EditLicenseModal({ license, onClose, onSave }: {
                     <div className="form-group">
                         <label className="form-label">Alamat</label>
                         <input className="form-input" value={form.address} onChange={e => set('address', e.target.value)} />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Domain</label>
+                        <input className="form-input" value={form.boundDomain} onChange={e => set('boundDomain', e.target.value)} placeholder="notaris.example.com" />
                     </div>
 
                     <div className="form-group">
